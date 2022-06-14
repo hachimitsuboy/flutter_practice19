@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 void main() {
   runApp(const MyApp());
@@ -147,49 +148,55 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Local Notifications'),
-      ),
-      body: Center(
-        child: Column(
-          children: [
-            const SizedBox(height: 100),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: TextField(
-                controller: messageController,
-                decoration: const InputDecoration(
-                  hintText: "やること",
+    return KeyboardDismissOnTap(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Local Notifications'),
+        ),
+        body: Center(
+          child: Column(
+            children: [
+              const SizedBox(height: 100),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: TextField(
+                  keyboardType: TextInputType.text,
+                  controller: messageController,
+                  decoration: const InputDecoration(
+                    labelText: "やること",
+                  ),
+                  onSubmitted: (todo) {
+                    print(todo);
+                    message = messageController.text;
+                  },
                 ),
-                onSubmitted: (todo) {
-                  print(todo);
-                  message = messageController.text;
-                },
               ),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-                onPressed: () {
-                  print("日付を選んでください");
-                  dataPicker(context);
-                },
-                child: const Text("日付を選択")),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () async {
-                await _cancelNotification();
-                await _requestPermissions();
+              const SizedBox(height: 40),
 
-                final setDateTime = dateTime;
-                await _registerMessage(
-                  day: setDateTime.day,
-                  message: message,
-                );
-              },
-              child: const Text('Show Notification'),
-            ),
-          ],
+              ElevatedButton(
+                  onPressed: () {
+                    print("日付を選んでください");
+                    dataPicker(context);
+                  },
+                  child: const Text("日付を選択")),
+              const SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: () async {
+                  messageController.text = "";
+                  await _cancelNotification();
+                  await _requestPermissions();
+
+                  final setDateTime = dateTime;
+                  await _registerMessage(
+                    day: setDateTime.day,
+                    message: message,
+                  );
+
+                },
+                child: const Text('Show Notification'),
+              ),
+            ],
+          ),
         ),
       ),
     );
